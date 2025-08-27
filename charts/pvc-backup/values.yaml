@@ -1,0 +1,23 @@
+appName: ""
+pvcName: ""
+
+backup:
+  schedule: "0 1 * * *"  # Daily at 01:00
+  retain:
+    daily: 7
+    weekly: 4
+  pruneIntervalDays: 7
+  cacheCapacity: 2Gi
+  storageClassName: longhorn
+  volumeSnapshotClassName: longhorn-snapshot
+
+restic:
+  runAsUser: 65534
+  runAsGroup: 65534
+  fsGroup: 65534
+
+b2:
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: onepassword-connect
+  secretKey: backblaze-volsync

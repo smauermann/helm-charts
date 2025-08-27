@@ -1,0 +1,7 @@
+owner: smauermann
+git-repo: helm-charts
+charts-repo-url: https://smauermann.github.io/helm-charts
+index-path: .cr-release-packages/index.yaml
+package-path: .cr-release-packages
+pages-branch: gh-pages
+pages-index-path: index.yaml
