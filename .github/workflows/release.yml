@@ -37,18 +37,11 @@ jobs:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
           CR_GENERATE_RELEASE_NOTES: true
 
-      - name: Generate Helm repository index
+      - name: Create index.html for repository
         if: github.ref == 'refs/heads/main'
         run: |
-          # Ensure the packages directory exists
+          # Ensure the packages directory exists  
           mkdir -p .cr-release-packages
-          
-          # Use cr index to generate index.yaml from GitHub releases
-          cr index \
-            --owner smauermann \
-            --git-repo helm-charts \
-            --index-path .cr-release-packages/index.yaml \
-            --token "$CR_TOKEN"
           
           # Create a simple index.html for the repo
           cat > .cr-release-packages/index.html << 'EOF'
@@ -64,8 +57,6 @@ jobs:
           </body>
           </html>
           EOF
-        env:
-          CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
