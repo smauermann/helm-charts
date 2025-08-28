@@ -37,6 +37,30 @@ jobs:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
           CR_GENERATE_RELEASE_NOTES: true
 
+      - name: Generate Helm repository index
+        if: github.ref == 'refs/heads/main'
+        run: |
+          # Ensure the packages directory exists
+          mkdir -p .cr-release-packages
+          
+          # Generate the index.yaml file
+          helm repo index .cr-release-packages --url https://github.com/smauermann/helm-charts/releases/download
+          
+          # Create a simple index.html for the repo
+          cat > .cr-release-packages/index.html << 'EOF'
+          <!DOCTYPE html>
+          <html>
+          <head>
+              <title>Helm Charts Repository</title>
+          </head>
+          <body>
+              <h1>smauermann Helm Charts Repository</h1>
+              <p>Add this repository:</p>
+              <pre>helm repo add smauermann https://smauermann.github.io/helm-charts</pre>
+          </body>
+          </html>
+          EOF
+
       - name: Setup Pages
         uses: actions/configure-pages@v4
         if: github.ref == 'refs/heads/main'
