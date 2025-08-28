@@ -43,7 +43,18 @@ jobs:
           # Ensure the packages directory exists
           mkdir -p .cr-release-packages
           
-          # Generate the index.yaml file
+          # Download all release assets (chart packages) to the packages directory
+          gh release list --limit 100 --json tagName,assets | \
+            jq -r '.[] | select(.assets | length > 0) | .assets[].url' | \
+            while read -r url; do
+              filename=$(basename "$url")
+              if [[ "$filename" == *.tgz ]]; then
+                echo "Downloading $filename..."
+                curl -L -o ".cr-release-packages/$filename" "$url"
+              fi
+            done
+          
+          # Generate the index.yaml file with the downloaded packages
           helm repo index .cr-release-packages --url https://github.com/smauermann/helm-charts/releases/download
           
           # Create a simple index.html for the repo
@@ -60,6 +71,8 @@ jobs:
           </body>
           </html>
           EOF
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
