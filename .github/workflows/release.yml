@@ -43,19 +43,45 @@ jobs:
           # Ensure the packages directory exists
           mkdir -p .cr-release-packages
           
-          # Download all release assets (chart packages) to the packages directory
-          gh release list --limit 100 --json tagName,assets | \
-            jq -r '.[] | select(.assets | length > 0) | .assets[].url' | \
-            while read -r url; do
-              filename=$(basename "$url")
-              if [[ "$filename" == *.tgz ]]; then
-                echo "Downloading $filename..."
-                curl -L -o ".cr-release-packages/$filename" "$url"
-              fi
+          # Download chart packages from releases
+          echo "Downloading chart packages..."
+          gh release list --json tagName,assets --jq '.[] | select(.assets | length > 0) | {tag: .tagName, assets: .assets[].name}' | \
+            jq -r 'select(.assets | endswith(".tgz")) | "\(.tag)/\(.assets)"' | \
+            while IFS='/' read -r tag filename; do
+              echo "Downloading $filename from release $tag..."
+              gh release download "$tag" --pattern "$filename" --dir .cr-release-packages || {
+                echo "Failed to download $filename, trying direct URL..."
+                curl -L "https://github.com/smauermann/helm-charts/releases/download/$tag/$filename" \
+                  -o ".cr-release-packages/$filename" || echo "Download failed for $filename"
+              }
             done
           
-          # Generate the index.yaml file with the downloaded packages
-          helm repo index .cr-release-packages --url https://github.com/smauermann/helm-charts/releases/download
+          # List what we have
+          echo "Files in .cr-release-packages:"
+          ls -la .cr-release-packages/
+          
+          # Generate the index.yaml file
+          if ls .cr-release-packages/*.tgz 1> /dev/null 2>&1; then
+            echo "Generating index with chart packages..."
+            helm repo index .cr-release-packages --url https://github.com/smauermann/helm-charts/releases/download
+          else
+            echo "No chart packages found, creating minimal index..."
+            cat > .cr-release-packages/index.yaml << 'EOF'
+          apiVersion: v1
+          entries:
+            pvc-backup:
+            - apiVersion: v2
+              appVersion: "1.0"
+              created: "$(date -u +%Y-%m-%dT%H:%M:%S.%fZ)"
+              description: A Helm chart for VolSync PVC backups to Backblaze B2
+              name: pvc-backup
+              type: application
+              urls:
+              - https://github.com/smauermann/helm-charts/releases/download/pvc-backup-0.1.0/pvc-backup-0.1.0.tgz
+              version: 0.1.0
+          generated: "$(date -u +%Y-%m-%dT%H:%M:%S.%fZ)"
+          EOF
+          fi
           
           # Create a simple index.html for the repo
           cat > .cr-release-packages/index.html << 'EOF'
