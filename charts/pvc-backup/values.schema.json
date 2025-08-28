@@ -1,0 +1,138 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["appName", "pvcName"],
+  "properties": {
+    "appName": {
+      "type": "string",
+      "description": "Application name used in resource naming (e.g., 'jellyfin', 'radarr')",
+      "pattern": "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$",
+      "minLength": 1,
+      "maxLength": 63
+    },
+    "pvcName": {
+      "type": "string",
+      "description": "Name of the PersistentVolumeClaim to backup",
+      "pattern": "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$",
+      "minLength": 1,
+      "maxLength": 63
+    },
+    "backup": {
+      "type": "object",
+      "description": "Backup configuration settings",
+      "properties": {
+        "schedule": {
+          "type": "string",
+          "description": "Cron schedule for backups (default: daily at 1 AM)",
+          "pattern": "^(@(annually|yearly|monthly|weekly|daily|hourly|reboot))|(@every (\\d+(ns|us|µs|ms|s|m|h))+)|((((\\d+,)+\\d+|(\\d+([/\\-])\\d+)|\\d+|\\*) ?){5,7})$",
+          "default": "0 1 * * *"
+        },
+        "retain": {
+          "type": "object",
+          "description": "Backup retention policy",
+          "properties": {
+            "daily": {
+              "type": "integer",
+              "description": "Number of daily backups to retain",
+              "minimum": 1,
+              "maximum": 365,
+              "default": 7
+            },
+            "weekly": {
+              "type": "integer",
+              "description": "Number of weekly backups to retain",
+              "minimum": 0,
+              "maximum": 52,
+              "default": 4
+            }
+          },
+          "additionalProperties": false
+        },
+        "pruneIntervalDays": {
+          "type": "integer",
+          "description": "Interval in days between backup pruning operations",
+          "minimum": 1,
+          "maximum": 365,
+          "default": 7
+        },
+        "cacheCapacity": {
+          "type": "string",
+          "description": "Size of the restic cache volume (e.g., '2Gi', '1Gi')",
+          "pattern": "^\\d+([EPTGMK]i?)?$",
+          "default": "2Gi"
+        },
+        "storageClassName": {
+          "type": "string",
+          "description": "Storage class for backup cache volumes",
+          "default": "longhorn"
+        },
+        "volumeSnapshotClassName": {
+          "type": "string",
+          "description": "Volume snapshot class for creating PVC snapshots",
+          "default": "longhorn-snapshot"
+        }
+      },
+      "additionalProperties": false
+    },
+    "restic": {
+      "type": "object",
+      "description": "Restic security context configuration",
+      "properties": {
+        "runAsUser": {
+          "type": "integer",
+          "description": "User ID to run restic process",
+          "minimum": 0,
+          "maximum": 65535,
+          "default": 65534
+        },
+        "runAsGroup": {
+          "type": "integer",
+          "description": "Group ID to run restic process",
+          "minimum": 0,
+          "maximum": 65535,
+          "default": 65534
+        },
+        "fsGroup": {
+          "type": "integer",
+          "description": "File system group ID for restic volumes",
+          "minimum": 0,
+          "maximum": 65535,
+          "default": 65534
+        }
+      },
+      "additionalProperties": false
+    },
+    "b2": {
+      "type": "object",
+      "description": "Backblaze B2 configuration via External Secrets",
+      "properties": {
+        "secretStoreRef": {
+          "type": "object",
+          "description": "Reference to the secret store containing B2 credentials",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "description": "Type of secret store",
+              "enum": ["SecretStore", "ClusterSecretStore"],
+              "default": "ClusterSecretStore"
+            },
+            "name": {
+              "type": "string",
+              "description": "Name of the secret store",
+              "default": "onepassword-connect"
+            }
+          },
+          "required": ["kind", "name"],
+          "additionalProperties": false
+        },
+        "secretKey": {
+          "type": "string",
+          "description": "Key name in the secret store containing B2 credentials",
+          "default": "backblaze-volsync"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

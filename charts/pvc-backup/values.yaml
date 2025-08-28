@@ -1,23 +1,53 @@
+# -- Application name used in resource naming (required)
+# Example: "jellyfin", "radarr", "sonarr"
 appName: ""
+
+# -- Name of the PersistentVolumeClaim to backup (required)
+# Example: "jellyfin-config", "radarr-data"
 pvcName: ""
 
 backup:
-  schedule: "0 1 * * *"  # Daily at 01:00
+  # -- Backup schedule in cron format
+  # Default: Daily at 1:00 AM
+  # Examples: "0 2 * * *" (2 AM daily), "0 1 * * 0" (1 AM Sundays only)
+  schedule: "0 1 * * *"
+  
   retain:
+    # -- Number of daily backups to keep
     daily: 7
+    # -- Number of weekly backups to keep  
     weekly: 4
+  
+  # -- How often to run backup pruning (in days)
   pruneIntervalDays: 7
+  
+  # -- Size of restic cache volume
+  # Examples: "1Gi", "2Gi", "512Mi"
   cacheCapacity: 2Gi
+  
+  # -- Storage class for backup cache volumes
   storageClassName: longhorn
+  
+  # -- Volume snapshot class for creating PVC snapshots
   volumeSnapshotClassName: longhorn-snapshot
 
+# Restic security context configuration
 restic:
+  # -- User ID to run restic process as
   runAsUser: 65534
+  # -- Group ID to run restic process as
   runAsGroup: 65534
+  # -- File system group for restic volumes
   fsGroup: 65534
 
+# Backblaze B2 configuration via External Secrets
 b2:
   secretStoreRef:
+    # -- Type of secret store (SecretStore or ClusterSecretStore)
     kind: ClusterSecretStore
+    # -- Name of the secret store containing B2 credentials
     name: onepassword-connect
+  # -- Key in secret store containing B2 credentials
+  # The secret should contain: RESTIC_PASSWORD, AWS_ACCESS_KEY_ID, 
+  # AWS_SECRET_ACCESS_KEY, AWS_DEFAULT_REGION, AWS_S3_ENDPOINT, BUCKET_NAME
   secretKey: backblaze-volsync
