@@ -1,5 +1,5 @@
 # -- Application name used in resource naming (required)
-# Example: "jellyfin", "radarr", "sonarr"
+# Example: "mealie", "pocket-id", "jellyfin"
 appName: ""
 
 # -- Name of the PersistentVolumeClaim to backup (required)
