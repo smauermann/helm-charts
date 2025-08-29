@@ -11,23 +11,23 @@ backup:
   # Default: Daily at 1:00 AM
   # Examples: "0 2 * * *" (2 AM daily), "0 1 * * 0" (1 AM Sundays only)
   schedule: "0 1 * * *"
-  
+
   retain:
     # -- Number of daily backups to keep
     daily: 7
-    # -- Number of weekly backups to keep  
+    # -- Number of weekly backups to keep
     weekly: 4
-  
+
   # -- How often to run backup pruning (in days)
   pruneIntervalDays: 7
-  
+
   # -- Size of restic cache volume
   # Examples: "1Gi", "2Gi", "512Mi"
   cacheCapacity: 2Gi
-  
+
   # -- Storage class for backup cache volumes
   storageClassName: longhorn
-  
+
   # -- Volume snapshot class for creating PVC snapshots
   volumeSnapshotClassName: longhorn-snapshot
 
@@ -48,6 +48,6 @@ b2:
     # -- Name of the secret store containing B2 credentials
     name: onepassword-connect
   # -- Key in secret store containing B2 credentials
-  # The secret should contain: RESTIC_PASSWORD, AWS_ACCESS_KEY_ID, 
+  # The secret should contain: RESTIC_PASSWORD, AWS_ACCESS_KEY_ID,
   # AWS_SECRET_ACCESS_KEY, AWS_DEFAULT_REGION, AWS_S3_ENDPOINT, BUCKET_NAME
   secretKey: backblaze-volsync
