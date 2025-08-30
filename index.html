@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Helm Charts Repository</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            line-height: 1.6;
+            color: #333;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        .chart {
+            border: 1px solid #e1e5e9;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            background: #f8f9fa;
+        }
+        .chart-name {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #0969da;
+        }
+        .chart-version {
+            font-size: 0.875rem;
+            color: #656d76;
+            margin-bottom: 1rem;
+        }
+        .chart-description {
+            margin-bottom: 1rem;
+        }
+        .install-cmd {
+            background: #f6f8fa;
+            border: 1px solid #d1d9e0;
+            border-radius: 6px;
+            padding: 1rem;
+            font-family: 'SFMono-Regular', Consolas, monospace;
+            font-size: 0.875rem;
+            overflow-x: auto;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid #e1e5e9;
+            color: #656d76;
+        }
+        a {
+            color: #0969da;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Helm Charts Repository</h1>
+        <p>Collection of Helm charts for Kubernetes deployments</p>
+    </div>
+
+    <div class="chart">
+        <div class="chart-name">Available Charts</div>
+        <div class="chart-description">
+            Browse available charts and their versions in the repository index.
+        </div>
+        <div class="install-cmd">
+# Add repository
+helm repo add smauermann https://smauermann.github.io/helm-charts
+
+# Search available charts
+helm search repo smauermann
+
+# Install any chart
+helm install &lt;release-name&gt; smauermann/&lt;chart-name&gt;</div>
+    </div>
+
+    <div class="footer">
+        <p>Repository: <a href="https://github.com/smauermann/helm-charts">github.com/smauermann/helm-charts</a></p>
+    </div>
+</body>
+</html>
