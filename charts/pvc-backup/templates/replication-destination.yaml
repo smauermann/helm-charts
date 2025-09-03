@@ -1,0 +1,25 @@
+{{- if .Values.restore.enabled }}
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/volsync.backube/replicationdestination_v1alpha1.json
+---
+apiVersion: volsync.backube/v1alpha1
+kind: ReplicationDestination
+metadata:
+  name: {{ .Values.appName }}-restore-b2
+spec:
+  trigger:
+    manual: {{ .Values.restore.trigger | quote }}
+  restic:
+    destinationPVC: {{ .Values.restore.destinationPVC | default .Values.pvcName }}
+    repository: {{ .Values.appName }}-volsync-b2
+    copyMethod: {{ .Values.restore.copyMethod }}
+    {{- if .Values.restore.restoreAsOf }}
+    restoreAsOf: {{ .Values.restore.restoreAsOf | quote }}
+    {{- end }}
+    cacheCapacity: {{ .Values.restore.cacheCapacity | default .Values.backup.cacheCapacity }}
+    moverSecurityContext:
+      runAsUser: {{ .Values.restic.runAsUser }}
+      runAsGroup: {{ .Values.restic.runAsGroup }}
+      fsGroup: {{ .Values.restic.fsGroup }}
+      fsGroupChangePolicy: Always
+    storageClassName: {{ .Values.restore.storageClassName | default .Values.backup.storageClassName }}
+{{- end }}

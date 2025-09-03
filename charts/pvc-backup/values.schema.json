@@ -132,6 +132,51 @@
         }
       },
       "additionalProperties": false
+    },
+    "restore": {
+      "type": "object",
+      "description": "Restore configuration for recovering PVC data from backups",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Enable restore functionality (creates ReplicationDestination)",
+          "default": false
+        },
+        "destinationPVC": {
+          "type": "string",
+          "description": "Name of the PVC to restore data into (defaults to pvcName if empty)",
+          "pattern": "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$",
+          "maxLength": 63
+        },
+        "trigger": {
+          "type": "string",
+          "description": "Manual trigger name for restore operation",
+          "minLength": 1,
+          "maxLength": 63,
+          "default": "restore"
+        },
+        "restoreAsOf": {
+          "type": "string",
+          "description": "RFC-3339 timestamp for point-in-time restore (optional)",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d{3})?Z?$"
+        },
+        "copyMethod": {
+          "type": "string",
+          "description": "Copy method for restore operation",
+          "enum": ["Direct", "Clone", "Snapshot"],
+          "default": "Snapshot"
+        },
+        "cacheCapacity": {
+          "type": "string",
+          "description": "Size of restic cache volume for restore (defaults to backup.cacheCapacity)",
+          "pattern": "^\\d+([EPTGMK]i?)?$"
+        },
+        "storageClassName": {
+          "type": "string",
+          "description": "Storage class for restore cache volumes (defaults to backup.storageClassName)"
+        }
+      },
+      "additionalProperties": false
     }
   },
   "additionalProperties": false

@@ -5,9 +5,11 @@ A Helm chart for creating automated PVC backups using VolSync and Restic to Back
 ## Features
 
 - **Automated daily backups** of Kubernetes PVCs
+- **One-click restore** from any backup to a PVC
 - **VolSync integration** with Restic backend
 - **Backblaze B2 storage** with encryption
 - **Configurable retention** policies (daily/weekly)
+- **Point-in-time restore** from specific backup timestamps
 - **1Password integration** for secure credential management
 - **Longhorn snapshot support** for consistent backups
 
@@ -41,6 +43,13 @@ helm install my-app-backup smauermann/pvc-backup \
 | `backup.cacheCapacity` | Restic cache size | `"2Gi"` |
 | `backup.storageClassName` | Storage class for cache | `"longhorn"` |
 | `backup.volumeSnapshotClassName` | Volume snapshot class | `"longhorn-snapshot"` |
+| `restore.enabled` | Enable restore functionality | `false` |
+| `restore.destinationPVC` | PVC to restore data into | `""` (defaults to pvcName) |
+| `restore.trigger` | Manual trigger name for restore | `"restore"` |
+| `restore.restoreAsOf` | RFC-3339 timestamp for point-in-time restore | `""` |
+| `restore.copyMethod` | Copy method for restore | `"Snapshot"` |
+| `restore.cacheCapacity` | Cache size for restore | `""` (defaults to backup.cacheCapacity) |
+| `restore.storageClassName` | Storage class for restore cache | `""` (defaults to backup.storageClassName) |
 | `restic.runAsUser` | Security context user ID | `65534` |
 | `restic.runAsGroup` | Security context group ID | `65534` |
 | `restic.fsGroup` | Security context FS group | `65534` |
@@ -86,11 +95,34 @@ backup:
   volumeSnapshotClassName: fast-ssd-snapshot
 ```
 
+### Restore from Backup
+```yaml
+appName: jellyfin
+pvcName: jellyfin-config
+restore:
+  enabled: true
+  destinationPVC: jellyfin-config-restored
+  trigger: restore-2024-01-15
+```
+
+### Point-in-time Restore
+```yaml
+appName: database
+pvcName: postgres-data
+restore:
+  enabled: true
+  destinationPVC: postgres-data-recovery
+  trigger: restore-emergency
+  restoreAsOf: "2024-01-15T10:30:00Z"
+  copyMethod: Snapshot
+```
+
 ## Created Resources
 
 This chart creates:
 - **ReplicationSource**: VolSync resource for backup scheduling
 - **ExternalSecret**: Pulls B2 credentials from your secret store
+- **ReplicationDestination** (when restore.enabled=true): VolSync resource for restoring data from backups
 
 ## Monitoring
 
@@ -105,5 +137,24 @@ kubectl describe replicationsource <appname>-data-b2
 kubectl logs -n volsync-system deployment/volsync
 ```
 
+### Restore Failures
+Check the ReplicationDestination status and logs:
+```bash
+kubectl describe replicationdestination <appname>-restore-b2
+kubectl logs -n volsync-system deployment/volsync
+```
+
 ### Permission Issues
 Ensure the security context settings match your cluster's security policies.
+
+## Restore Workflow
+
+1. **Enable restore** by setting `restore.enabled: true`
+2. **Create destination PVC** (or use existing one via `restore.destinationPVC`)
+3. **Deploy the chart** - this creates the ReplicationDestination resource
+4. **Monitor restore progress**:
+   ```bash
+   kubectl get replicationdestination <appname>-restore-b2 -o yaml
+   ```
+5. **Verify completion** when `.status.lastManualSync` matches `.spec.trigger.manual`
+6. **Disable restore** by setting `restore.enabled: false` and upgrading to clean up resources
