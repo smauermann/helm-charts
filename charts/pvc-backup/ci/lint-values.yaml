@@ -57,3 +57,5 @@ restore:
   enabled: false
   destinationPVC: "test-data-restored"
   trigger: "test-restore"
+  restoreAsOf: "2024-01-15T10:30:00Z"
+  cacheCapacity: "1Gi"
