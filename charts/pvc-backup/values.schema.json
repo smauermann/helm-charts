@@ -145,7 +145,7 @@
         "destinationPVC": {
           "type": "string",
           "description": "Name of the PVC to restore data into (defaults to pvcName if empty)",
-          "pattern": "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$",
+          "pattern": "^(|[a-z0-9]([-a-z0-9]*[a-z0-9])?)$",
           "maxLength": 63
         },
         "trigger": {
@@ -158,7 +158,7 @@
         "restoreAsOf": {
           "type": "string",
           "description": "RFC-3339 timestamp for point-in-time restore (optional)",
-          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d{3})?Z?$"
+          "pattern": "^(|\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d{3})?Z?)$"
         },
         "copyMethod": {
           "type": "string",
@@ -169,7 +169,7 @@
         "cacheCapacity": {
           "type": "string",
           "description": "Size of restic cache volume for restore (defaults to backup.cacheCapacity)",
-          "pattern": "^\\d+([EPTGMK]i?)?$"
+          "pattern": "^(|\\d+([EPTGMK]i?)?)$"
         },
         "storageClassName": {
           "type": "string",
