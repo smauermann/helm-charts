@@ -15,6 +15,9 @@ spec:
     {{- if .Values.restore.restoreAsOf }}
     restoreAsOf: {{ .Values.restore.restoreAsOf | quote }}
     {{- end }}
+    {{- if .Values.restore.enableFileDeletion }}
+    enableFileDeletion: {{ .Values.restore.enableFileDeletion }}
+    {{- end }}
     cacheCapacity: {{ .Values.restore.cacheCapacity | default .Values.backup.cacheCapacity }}
     moverSecurityContext:
       runAsUser: {{ .Values.restic.runAsUser }}
