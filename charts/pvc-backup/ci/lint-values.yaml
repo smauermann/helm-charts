@@ -54,7 +54,7 @@ b2:
 
 # Restore configuration (disabled for CI testing)
 restore:
-  enabled: false
+  enabled: true
   destinationPVC: "test-data-restored"
   trigger: "test-restore"
   restoreAsOf: "2024-01-15T10:30:00Z"
