@@ -12,11 +12,11 @@ spec:
     destinationPVC: {{ .Values.restore.destinationPVC | default .Values.pvcName }}
     repository: {{ .Values.appName }}-volsync-b2
     copyMethod: {{ .Values.restore.copyMethod }}
-    {{- if .Values.restore.restoreAsOf }}
-    restoreAsOf: {{ .Values.restore.restoreAsOf | quote }}
+    {{- with .Values.restore.restoreAsOf }}
+    restoreAsOf: {{ . | quote }}
     {{- end }}
-    {{- if .Values.restore.enableFileDeletion }}
-    enableFileDeletion: {{ .Values.restore.enableFileDeletion }}
+    {{- with .Values.restore.enableFileDeletion }}
+    enableFileDeletion: {{ . }}
     {{- end }}
     cacheCapacity: {{ .Values.restore.cacheCapacity | default .Values.backup.cacheCapacity }}
     moverSecurityContext:
