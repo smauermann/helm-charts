@@ -84,3 +84,9 @@ restore:
   # -- Storage class for restore cache volumes
   # Defaults to backup.storageClassName if not specified
   storageClassName: ""
+
+  # -- Enable file deletion during restore
+  # If true, files and directories that exist on the PVC being restored to
+  # will be deleted if they do not exist in the restic snapshot being restored
+  # Default: false
+  enableFileDeletion: false
