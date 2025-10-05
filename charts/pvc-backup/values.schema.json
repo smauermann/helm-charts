@@ -179,7 +179,17 @@
           "type": "boolean",
           "description": "Enable file deletion during restore - files on PVC will be deleted if they don't exist in snapshot",
           "default": false
-        }
+        },
+        "cleanupCachePVC": {
+          "type": "boolean",
+          "description": "Enable cache PVC deletion after restore",
+          "default": false
+        },
+        "cleanupTempPVC": {
+          "type": "boolean",
+          "description": "Enable temporary destination PVC deletion. Ignored if `destinationPVC` is set",
+          "default": false
+        },
       },
       "additionalProperties": false
     }

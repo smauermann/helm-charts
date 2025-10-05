@@ -27,4 +27,10 @@ spec:
       fsGroup: {{ .Values.restic.fsGroup }}
       fsGroupChangePolicy: Always
     storageClassName: {{ .Values.restore.storageClassName | default .Values.backup.storageClassName }}
+    {{- with .Values.restore.cleanupCachePVC }}
+    cleanupCachePVC: {{ . }}
+    {{- end }}
+    {{- with .Values.restore.cleanupTempPVC }}
+    cleanupTempPVC: {{ . }}
+    {{- end }}
 {{- end }}
