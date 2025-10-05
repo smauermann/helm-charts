@@ -5,6 +5,8 @@ apiVersion: volsync.backube/v1alpha1
 kind: ReplicationDestination
 metadata:
   name: {{ .Values.appName }}-restore-b2
+  labels:
+    {{- include "chart.labels" . | nindent 4 }}
 spec:
   trigger:
     manual: {{ .Values.restore.trigger | quote }}
