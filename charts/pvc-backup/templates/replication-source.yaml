@@ -4,6 +4,8 @@ apiVersion: volsync.backube/v1alpha1
 kind: ReplicationSource
 metadata:
   name: {{ .Values.appName }}-data-b2
+  labels:
+    {{- include "chart.labels" . | nindent 4 }}
 spec:
   sourcePVC: {{ .Values.pvcName }}
   trigger:
