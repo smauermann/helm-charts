@@ -20,17 +20,76 @@
     "backup": {
       "type": "object",
       "description": "Backup configuration settings",
+      "required": ["trigger"],
       "properties": {
-        "schedule": {
-          "type": "string",
-          "description": "Cron schedule for backups (default: daily at 1 AM)",
-          "pattern": "^(@(annually|yearly|monthly|weekly|daily|hourly|reboot))|(@every (\\d+(ns|us|µs|ms|s|m|h))+)|((((\\d+,)+\\d+|(\\d+([/\\-])\\d+)|\\d+|\\*) ?){5,7})$",
-          "default": "0 1 * * *"
+        "trigger": {
+          "type": "object",
+          "description": "Backup trigger configuration. Use a cron schedule, manual trigger, or both.",
+          "properties": {
+            "schedule": {
+              "type": ["string", "null"],
+              "description": "Cron schedule for backups (default: daily at 1 AM)",
+              "pattern": "^(@(annually|yearly|monthly|weekly|daily|hourly|reboot))|(@every (\\d+(ns|us|µs|ms|s|m|h))+)|((((\\d+,)+\\d+|(\\d+([/\\-])\\d+)|\\d+|\\*) ?){5,7})$",
+              "default": "0 1 * * *"
+            },
+            "manual": {
+              "type": ["string", "null"],
+              "description": "Manual trigger name for backup operation. Change this value to initiate a backup immediately.",
+              "minLength": 1,
+              "maxLength": 63,
+              "default": null
+            }
+          },
+          "additionalProperties": false,
+          "default": {
+            "schedule": "0 1 * * *",
+            "manual": null
+          },
+          "anyOf": [
+            {
+              "properties": {
+                "schedule": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": ["schedule"]
+            },
+            {
+              "properties": {
+                "manual": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": ["manual"]
+            }
+          ],
+          "not": {
+            "properties": {
+              "schedule": {
+                "type": "string",
+                "minLength": 1
+              },
+              "manual": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": ["schedule", "manual"]
+          }
         },
         "retain": {
           "type": "object",
           "description": "Backup retention policy",
           "properties": {
+            "hourly": {
+              "type": "integer",
+              "description": "Number of hourly backups to retain",
+              "minimum": 0,
+              "maximum": 168,
+              "default": 0
+            },
             "daily": {
               "type": "integer",
               "description": "Number of daily backups to retain",

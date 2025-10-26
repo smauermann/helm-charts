@@ -7,12 +7,20 @@ appName: ""
 pvcName: ""
 
 backup:
-  # -- Backup schedule in cron format
-  # Default: Daily at 1:00 AM
-  # Examples: "0 2 * * *" (2 AM daily), "0 1 * * 0" (1 AM Sundays only)
-  schedule: "0 1 * * *"
+  # -- Backup trigger, either schedule or manual trigger
+  trigger:
+    # -- Backup schedule in cron format
+    # Default: Daily at 1:00 AM
+    # Examples: "0 2 * * *" (2 AM daily), "0 1 * * 0" (1 AM Sundays only)
+    schedule: "0 1 * * *"
+    # -- Manual trigger name for backup operation
+    # Change this value to trigger a new backup
+    # Example: "backup-2024-01-15", "emergency-backup"
+    manual: ~
 
   retain:
+    # -- Number of hourly backups to keep
+    hourly: 0
     # -- Number of daily backups to keep
     daily: 7
     # -- Number of weekly backups to keep
