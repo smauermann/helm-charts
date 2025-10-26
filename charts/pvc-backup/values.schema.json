@@ -189,7 +189,7 @@
           "type": "boolean",
           "description": "Enable temporary destination PVC deletion. Ignored if `destinationPVC` is set",
           "default": false
-        },
+        }
       },
       "additionalProperties": false
     }
