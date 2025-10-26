@@ -8,8 +8,19 @@ metadata:
     {{- include "chart.labels" . | nindent 4 }}
 spec:
   sourcePVC: {{ .Values.pvcName }}
+  {{- $trigger := .Values.backup.trigger }}
+  {{- $hasSchedule := and $trigger.schedule (ne $trigger.schedule "") }}
+  {{- $hasManual := and $trigger.manual (ne $trigger.manual "") }}
+  {{- if and $hasSchedule $hasManual }}
+    {{- fail "backup.trigger: configure only one of schedule or manual" }}
+  {{- end }}
   trigger:
-    schedule: {{ .Values.backup.schedule | quote }}
+    {{- if $hasSchedule }}
+    schedule: {{ $trigger.schedule | quote }}
+    {{- end }}
+    {{- if $hasManual }}
+    manual: {{ $trigger.manual | quote }}
+    {{- end }}
   restic:
     cacheCapacity: {{ .Values.backup.cacheCapacity }}
     copyMethod: Snapshot
@@ -20,6 +31,7 @@ spec:
       fsGroupChangePolicy: Always
     pruneIntervalDays: {{ .Values.backup.pruneIntervalDays }}
     retain:
+      hourly: {{ .Values.backup.retain.hourly }}
       daily: {{ .Values.backup.retain.daily }}
       weekly: {{ .Values.backup.retain.weekly }}
     repository: {{ .Values.appName }}-volsync-b2

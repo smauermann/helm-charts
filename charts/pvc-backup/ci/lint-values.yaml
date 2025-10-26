@@ -7,10 +7,9 @@ appName: "test"
 pvcName: "test-data"
 
 backup:
-  # -- Backup schedule in cron format
-  # Default: Daily at 1:00 AM
-  # Examples: "0 2 * * *" (2 AM daily), "0 1 * * 0" (1 AM Sundays only)
-  schedule: "0 1 * * *"
+  # -- Backup trigger
+  trigger:
+    manual: foobar
 
   retain:
     # -- Number of daily backups to keep
@@ -52,7 +51,7 @@ b2:
   # AWS_SECRET_ACCESS_KEY, AWS_DEFAULT_REGION, AWS_S3_ENDPOINT, BUCKET_NAME
   secretKey: backblaze-volsync
 
-# Restore configuration (disabled for CI testing)
+# Restore configuration
 restore:
   enabled: true
   destinationPVC: "test-data-restored"
