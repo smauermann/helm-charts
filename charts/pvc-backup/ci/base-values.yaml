@@ -1,0 +1,35 @@
+# Common defaults used across scenario tests.
+appName: "test"
+pvcName: "test-data"
+
+backup:
+  trigger:
+    schedule: "0 1 * * *"
+    manual: null
+  retain:
+    hourly: 0
+    daily: 7
+    weekly: 4
+  pruneIntervalDays: 7
+  cacheCapacity: 2Gi
+  storageClassName: longhorn
+  volumeSnapshotClassName: longhorn-snapshot
+
+restic:
+  runAsUser: 65534
+  runAsGroup: 65534
+  fsGroup: 65534
+
+b2:
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: onepassword-connect
+  secretKey: backblaze-volsync
+
+restore:
+  enabled: true
+  destinationPVC: "test-data-restored"
+  trigger: "test-restore"
+  restoreAsOf: "2024-01-15T10:30:00Z"
+  cacheCapacity: "1Gi"
+  enableFileDeletion: true
