@@ -24,7 +24,7 @@
       "properties": {
         "trigger": {
           "type": "object",
-          "description": "Backup trigger configuration. Use a cron schedule, manual trigger, or both.",
+          "description": "Backup trigger configuration. Set exactly one of cron schedule or manual trigger.",
           "properties": {
             "schedule": {
               "type": ["string", "null"],
@@ -47,37 +47,24 @@
           },
           "anyOf": [
             {
+              "required": ["schedule"],
               "properties": {
                 "schedule": {
                   "type": "string",
                   "minLength": 1
                 }
-              },
-              "required": ["schedule"]
+              }
             },
             {
+              "required": ["manual"],
               "properties": {
                 "manual": {
                   "type": "string",
                   "minLength": 1
                 }
-              },
-              "required": ["manual"]
-            }
-          ],
-          "not": {
-            "properties": {
-              "schedule": {
-                "type": "string",
-                "minLength": 1
-              },
-              "manual": {
-                "type": "string",
-                "minLength": 1
               }
-            },
-            "required": ["schedule", "manual"]
-          }
+            }
+          ]
         },
         "retain": {
           "type": "object",
