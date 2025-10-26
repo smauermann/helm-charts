@@ -12,10 +12,12 @@ backup:
     # -- Backup schedule in cron format
     # Default: Daily at 1:00 AM
     # Examples: "0 2 * * *" (2 AM daily), "0 1 * * 0" (1 AM Sundays only)
+    # Set to null when using manual trigger only.
     schedule: "0 1 * * *"
     # -- Manual trigger name for backup operation
     # Change this value to trigger a new backup
     # Example: "backup-2024-01-15", "emergency-backup"
+    # Requires schedule to be null.
     manual: ~
 
   retain:
