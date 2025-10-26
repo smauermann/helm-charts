@@ -45,7 +45,33 @@ jobs:
       - name: Run helm template (render check)
         if: steps.list-changed.outputs.changed == 'true'
         run: |
+          set -euo pipefail
           for chart in $(ct list-changed --target-branch ${{ github.event.repository.default_branch }}); do
-            echo "Testing template rendering for $chart with lint-values"
-            helm template test-release "$chart" --debug --dry-run -f "$chart/ci/lint-values.yaml"
+            values_dir="$chart/ci"
+            if [[ ! -d "$values_dir" ]]; then
+              echo "Skipping $chart because $values_dir does not exist"
+              continue
+            fi
+
+            base_values=""
+            if [[ -f "$values_dir/base-values.yaml" ]]; then
+              base_values="$values_dir/base-values.yaml"
+              echo "Testing template rendering for $chart with $(basename "$base_values")"
+              helm template test-release "$chart" --debug --dry-run -f "$base_values"
+            fi
+
+            shopt -s nullglob
+            for values_file in "$values_dir"/*.yaml; do
+              if [[ "$values_file" == "$base_values" ]]; then
+                continue
+              fi
+
+              echo "Testing template rendering for $chart with $(basename "$values_file")"
+              if [[ -n "$base_values" ]]; then
+                helm template test-release "$chart" --debug --dry-run -f "$base_values" -f "$values_file"
+              else
+                helm template test-release "$chart" --debug --dry-run -f "$values_file"
+              fi
+            done
+            shopt -u nullglob
           done
