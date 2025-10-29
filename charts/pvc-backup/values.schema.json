@@ -107,9 +107,14 @@
           "pattern": "^\\d+([EPTGMK]i?)?$",
           "default": "2Gi"
         },
+        "cacheStorageClassName": {
+          "type": "string",
+          "description": "Storage class for restic cache volumes",
+          "default": "longhorn-single-replica"
+        },
         "storageClassName": {
           "type": "string",
-          "description": "Storage class for backup cache volumes",
+          "description": "Storage class for destination volumes",
           "default": "longhorn"
         },
         "volumeSnapshotClassName": {
@@ -217,9 +222,14 @@
           "description": "Size of restic cache volume for restore (defaults to backup.cacheCapacity)",
           "pattern": "^(|\\d+([EPTGMK]i?)?)$"
         },
+        "cacheStorageClassName": {
+          "type": "string",
+          "description": "Storage class for restore cache volumes (defaults to backup.cacheStorageClassName)",
+          "default": ""
+        },
         "storageClassName": {
           "type": "string",
-          "description": "Storage class for restore cache volumes (defaults to backup.storageClassName)"
+          "description": "Storage class for destination volumes used during restore (defaults to backup.storageClassName)"
         },
         "enableFileDeletion": {
           "type": "boolean",
