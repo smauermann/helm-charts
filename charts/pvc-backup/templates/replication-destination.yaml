@@ -21,6 +21,7 @@ spec:
     enableFileDeletion: {{ . }}
     {{- end }}
     cacheCapacity: {{ .Values.restore.cacheCapacity | default .Values.backup.cacheCapacity }}
+    cacheStorageClassName: {{ .Values.restore.cacheStorageClassName | default .Values.backup.cacheStorageClassName }}
     moverSecurityContext:
       runAsUser: {{ .Values.restic.runAsUser }}
       runAsGroup: {{ .Values.restic.runAsGroup }}

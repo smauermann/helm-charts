@@ -36,6 +36,9 @@ backup:
   cacheCapacity: 2Gi
 
   # -- Storage class for backup cache volumes
+  cacheStorageClassName: longhorn-single-replica
+
+  # -- Storage class for destination volumes
   storageClassName: longhorn
 
   # -- Volume snapshot class for creating PVC snapshots
@@ -92,6 +95,10 @@ restore:
   cacheCapacity: ""
 
   # -- Storage class for restore cache volumes
+  # Defaults to backup.cacheStorageClassName (then backup.storageClassName) if not specified
+  cacheStorageClassName: ""
+
+  # -- Storage class for destination volumes used during restore
   # Defaults to backup.storageClassName if not specified
   storageClassName: ""
 

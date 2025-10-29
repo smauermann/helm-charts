@@ -42,7 +42,8 @@ helm install my-app-backup smauermann/pvc-backup \
 | `backup.retain.weekly` | Weekly backups to retain | `4` |
 | `backup.pruneIntervalDays` | Prune interval in days | `7` |
 | `backup.cacheCapacity` | Restic cache size | `"2Gi"` |
-| `backup.storageClassName` | Storage class for cache | `"longhorn"` |
+| `backup.cacheStorageClassName` | Storage class for cache | `"longhorn-single-replica"` |
+| `backup.storageClassName` | Storage class for destination volumes | `"longhorn"` |
 | `backup.volumeSnapshotClassName` | Volume snapshot class | `"longhorn-snapshot"` |
 | `restore.enabled` | Enable restore functionality | `false` |
 | `restore.destinationPVC` | PVC to restore data into | `""` (defaults to pvcName) |
@@ -50,13 +51,16 @@ helm install my-app-backup smauermann/pvc-backup \
 | `restore.restoreAsOf` | RFC-3339 timestamp for point-in-time restore | `""` |
 | `restore.copyMethod` | Copy method for restore | `"Snapshot"` |
 | `restore.cacheCapacity` | Cache size for restore | `""` (defaults to backup.cacheCapacity) |
-| `restore.storageClassName` | Storage class for restore cache | `""` (defaults to backup.storageClassName) |
+| `restore.cacheStorageClassName` | Storage class for restore cache | `""` (defaults to backup.cacheStorageClassName) |
+| `restore.storageClassName` | Storage class for restore destination volumes | `""` (defaults to backup.storageClassName) |
 | `restic.runAsUser` | Security context user ID | `65534` |
 | `restic.runAsGroup` | Security context group ID | `65534` |
 | `restic.fsGroup` | Security context FS group | `65534` |
 | `b2.secretStoreRef.kind` | Secret store kind | `"ClusterSecretStore"` |
 | `b2.secretStoreRef.name` | Secret store name | `"onepassword-connect"` |
 | `b2.secretKey` | Secret key in store | `"backblaze-volsync"` |
+
+Use `restore.cacheStorageClassName` when the cache PVC should land on different storage than the restored data.
 
 ## Secret Structure
 
@@ -101,6 +105,7 @@ backup:
 appName: myapp
 pvcName: myapp-data
 backup:
+  cacheStorageClassName: fast-ssd-cache
   storageClassName: fast-ssd
   volumeSnapshotClassName: fast-ssd-snapshot
 ```
