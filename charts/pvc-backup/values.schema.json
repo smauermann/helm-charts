@@ -24,7 +24,7 @@
       "properties": {
         "trigger": {
           "type": "object",
-          "description": "Backup trigger configuration. Set exactly one of cron schedule or manual trigger.",
+          "description": "Backup trigger configuration. Provide a cron schedule, a manual trigger, or both (manual overrides schedule when both are set).",
           "properties": {
             "schedule": {
               "type": ["string", "null"],
@@ -34,7 +34,7 @@
             },
             "manual": {
               "type": ["string", "null"],
-              "description": "Manual trigger name for backup operation. Change this value to initiate a backup immediately.",
+              "description": "Manual trigger name for backup operation. Change this value to initiate a backup immediately. When set, schedule is ignored.",
               "minLength": 1,
               "maxLength": 63,
               "default": null

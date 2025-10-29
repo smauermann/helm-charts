@@ -37,6 +37,7 @@ helm install my-app-backup smauermann/pvc-backup \
 | `appName` | Application name (used in resource naming) | `""` (required) |
 | `pvcName` | Name of PVC to backup | `""` (required) |
 | `backup.schedule` | Backup cron schedule | `"0 1 * * *"` |
+| `backup.manual` | Manual trigger name; when set, schedule is ignored | `null` |
 | `backup.retain.daily` | Daily backups to retain | `7` |
 | `backup.retain.weekly` | Weekly backups to retain | `4` |
 | `backup.pruneIntervalDays` | Prune interval in days | `7` |
@@ -84,6 +85,15 @@ backup:
   retain:
     daily: 14
     weekly: 8
+```
+
+### Manual Backup Trigger
+```yaml
+appName: backup-fixture
+pvcName: pgdata-backup-fixture-postgres-1
+backup:
+  trigger:
+    manual: run-backup-now  # schedule defaults but is ignored when manual is set
 ```
 
 ### Different Storage Classes
