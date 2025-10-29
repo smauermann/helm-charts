@@ -11,15 +11,14 @@ spec:
   {{- $trigger := .Values.backup.trigger }}
   {{- $hasSchedule := and $trigger.schedule (ne $trigger.schedule "") }}
   {{- $hasManual := and $trigger.manual (ne $trigger.manual "") }}
-  {{- if and $hasSchedule $hasManual }}
-    {{- fail "backup.trigger: configure only one of schedule or manual" }}
+  {{- if and (not $hasManual) (not $hasSchedule) }}
+    {{- fail "backup.trigger: configure schedule or manual value" }}
   {{- end }}
   trigger:
-    {{- if $hasSchedule }}
-    schedule: {{ $trigger.schedule | quote }}
-    {{- end }}
     {{- if $hasManual }}
     manual: {{ $trigger.manual | quote }}
+    {{- else if $hasSchedule }}
+    schedule: {{ $trigger.schedule | quote }}
     {{- end }}
   restic:
     cacheCapacity: {{ .Values.backup.cacheCapacity }}

@@ -4,5 +4,4 @@ pvcName: "test-data"
 
 backup:
   trigger:
-    schedule: null
     manual: foobar

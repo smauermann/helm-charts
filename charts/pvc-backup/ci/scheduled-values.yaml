@@ -1,8 +1,0 @@
-# Overlay for scheduled-trigger scenario; combine with base-values.yaml.
-appName: "test"
-pvcName: "test-data"
-
-backup:
-  trigger:
-    schedule: "0 3 * * *"
-    manual: null
