@@ -3,6 +3,16 @@ entries:
   pvc-backup:
   - apiVersion: v2
     appVersion: "1.0"
+    created: "2025-10-29T22:00:34.744946773Z"
+    description: A Helm chart for VolSync PVC backups to Backblaze B2
+    digest: ce1b901b912dde1f811057b04a04763d6e01df27b5cd501f7dd5c88e0da9bbb3
+    name: pvc-backup
+    type: application
+    urls:
+    - https://github.com/smauermann/helm-charts/releases/download/pvc-backup-0.6.2/pvc-backup-0.6.2.tgz
+    version: 0.6.2
+  - apiVersion: v2
+    appVersion: "1.0"
     created: "2025-10-29T20:26:25.916957052Z"
     description: A Helm chart for VolSync PVC backups to Backblaze B2
     digest: eb4f9ea28d79e372ef88e18f8262223a836313359eee58c2a6546bf5dd502d82
@@ -71,4 +81,4 @@ entries:
     urls:
     - https://github.com/smauermann/helm-charts/releases/download/pvc-backup-0.1.1/pvc-backup-0.1.1.tgz
     version: 0.1.1
-generated: "2025-10-29T20:26:25.9169878Z"
+generated: "2025-10-29T22:00:34.745177903Z"
