@@ -12,9 +12,9 @@ spec:
   trigger:
     manual: {{ .Values.restore.trigger | quote }}
   restic:
-    capacity: {{ .Values.restore.pvc.size }}
-    cacheCapacity: {{ .Values.backup.cache.capacity }}
-    cacheStorageClassName: {{ .Values.backup.cache.storageClass }}
+    capacity: {{ .Values.restore.pvcSize }}
+    cacheCapacity: {{ .Values.restore.cacheCapacity | default .Values.backup.cacheCapacity }}
+    cacheStorageClassName: {{ .Values.restore.cacheStorageClass | default .Values.backup.cacheStorageClass }}
     {{- with .Values.restore.cleanupCachePVC }}
     cleanupCachePVC: {{ . }}
     {{- end }}
@@ -34,5 +34,5 @@ spec:
     {{- with .Values.restore.restoreAsOf }}
     restoreAsOf: {{ . | quote }}
     {{- end }}
-    storageClassName: {{ .Values.restore.pvc.storageClass | default .Values.backup.pvc.storageClass }}
+    storageClassName: {{ .Values.restore.storageClass | default .Values.backup.storageClass }}
 {{- end }}
