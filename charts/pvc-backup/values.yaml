@@ -2,9 +2,10 @@
 # Example: "mealie", "pocket-id", "jellyfin"
 appName: ""
 
-# -- Name of the PersistentVolumeClaim to backup (required)
-# Example: "jellyfin-config", "radarr-data"
-pvcName: ""
+# -- ArgoCD Sync Wave to ensure volume is populated before app is created
+# Examples: "-100", "42"
+# Default: 5Gi
+argoSyncWave: "-100"
 
 backup:
   # -- Backup trigger, either schedule or manual trigger
@@ -31,83 +32,23 @@ backup:
   # -- How often to run backup pruning (in days)
   pruneIntervalDays: 7
 
-  # -- Size of restic cache volume
-  # Examples: "1Gi", "2Gi", "512Mi"
-  cacheCapacity: 2Gi
+  cache:
+    # -- Size of restic cache volume
+    # Examples: "1Gi", "2Gi", "512Mi"
+    capacity: 2Gi
+    # -- Storage class for backup cache volumes
+    storageClass: longhorn-single-replica
 
-  # -- Storage class for backup cache volumes
-  cacheStorageClassName: longhorn-single-replica
-
-  # -- Storage class for destination volumes
-  storageClassName: longhorn
-
-  # -- Volume snapshot class for creating PVC snapshots
-  volumeSnapshotClassName: longhorn-snapshot
-
-# Restic security context configuration
-restic:
-  # -- User ID to run restic process as
-  runAsUser: 65534
-  # -- Group ID to run restic process as
-  runAsGroup: 65534
-  # -- File system group for restic volumes
-  fsGroup: 65534
-
-# Backblaze B2 configuration via External Secrets
-b2:
-  secretStoreRef:
-    # -- Type of secret store (SecretStore or ClusterSecretStore)
-    kind: ClusterSecretStore
-    # -- Name of the secret store containing B2 credentials
-    name: onepassword-connect
-  # -- Key in secret store containing B2 credentials
-  # The secret should contain: RESTIC_PASSWORD, AWS_ACCESS_KEY_ID,
-  # AWS_SECRET_ACCESS_KEY, AWS_DEFAULT_REGION, AWS_S3_ENDPOINT, BUCKET_NAME
-  secretKey: backblaze-volsync
+  pvc:
+    # -- Name of the source PVC (required)
+    name: ""
+    # -- Storage class for  volumes
+    storageClass: longhorn
+    # -- Volume snapshot class for creating PVC snapshots
+    volumeSnapshotClass: longhorn-snapshot
 
 # Restore configuration
 restore:
-  # -- Enable restore functionality (creates ReplicationDestination)
-  enabled: false
-
-  # -- Name of the PVC to restore data into (required when restore.enabled=true)
-  # If not specified, defaults to pvcName
-  # Example: "jellyfin-config-restored", "backup-restore-pvc"
-  destinationPVC: ""
-
-  # -- Manual trigger name for restore operation
-  # Change this value to trigger a new restore
-  # Example: "restore-2024-01-15", "emergency-restore"
-  trigger: "restore"
-
-  # -- Restore data from a specific point in time (RFC-3339 timestamp)
-  # If not specified, restores from the most recent backup
-  # Example: "2024-01-15T10:30:00Z"
-  restoreAsOf: ""
-
-  # -- Copy method for restore operation
-  # Options: "Direct", "Clone", "Snapshot"
-  copyMethod: "Snapshot"
-
-  # -- Size of restic cache volume for restore
-  # Defaults to backup.cacheCapacity if not specified
-  # Examples: "1Gi", "2Gi", "512Mi"
-  cacheCapacity: ""
-
-  # -- Storage class for restore cache volumes
-  # Defaults to backup.cacheStorageClassName (then backup.storageClassName) if not specified
-  cacheStorageClassName: ""
-
-  # -- Storage class for destination volumes used during restore
-  # Defaults to backup.storageClassName if not specified
-  storageClassName: ""
-
-  # -- Enable file deletion during restore
-  # If true, files and directories that exist on the PVC being restored to
-  # will be deleted if they do not exist in the restic snapshot being restored
-  # Default: false
-  enableFileDeletion: false
-
   # -- Enable cache PVC deletion
   # If true, restic cache PVC are deleted at the end of each restore. Cache PVCs will be always be deleted if the owning ReplicationDestination is removed.
   # Should be disabled when using longhorn https://github.com/backube/volsync/issues/1504
@@ -119,3 +60,57 @@ restore:
   # Should be disabled when using longhorn https://github.com/backube/volsync/issues/1504
   # Default: false
   cleanupTempPVC: false
+
+  # -- Enable restore functionality (creates ReplicationDestination)
+  enabled: false
+
+  # -- Enable file deletion during restore
+  # If true, files and directories that exist on the PVC being restored to
+  # will be deleted if they do not exist in the restic snapshot being restored
+  # Default: false
+  enableFileDeletion: false
+
+  pvc:
+    # -- Access modes for the destination volume
+    accessModes:
+      - ReadWriteOnce
+    # -- Name of the destination PVC
+    # Defaults to source PVC name
+    name: ""
+    # -- Storage class for destination volumes used during restore
+    # Defaults to source volume storageClass if omitted
+    storageClass: ""
+    # -- Size of the restored volume (required)
+    size: ""
+
+  # -- Restore data from a specific point in time (RFC-3339 timestamp)
+  # If not specified, restores from the most recent backup
+  # Example: "2024-01-15T10:30:00Z"
+  restoreAsOf: ""
+
+  # -- Manual trigger name for restore operation
+  # Change this value to trigger a new restore
+  # Example: "restore-2024-01-15", "emergency-restore"
+  trigger: "restore"
+
+# Restic security context configuration
+restic:
+  # -- User ID to run restic process as
+  runAsUser: 65534
+  # -- Group ID to run restic process as
+  runAsGroup: 65534
+  # -- File system group for restic volumes
+  fsGroup: 65534
+
+# Backblaze B2 configuration via External Secrets
+s3:
+  provider: b2
+  secretStoreRef:
+    # -- Type of secret store (SecretStore or ClusterSecretStore)
+    kind: ClusterSecretStore
+    # -- Name of the secret store containing B2 credentials
+    name: onepassword-connect
+  # -- Key in secret store containing B2 credentials
+  # The secret should contain: RESTIC_PASSWORD, AWS_ACCESS_KEY_ID,
+  # AWS_SECRET_ACCESS_KEY, AWS_DEFAULT_REGION, AWS_S3_ENDPOINT, BUCKET_NAME
+  secretKey: backblaze-volsync
