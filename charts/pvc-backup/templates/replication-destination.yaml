@@ -12,6 +12,7 @@ spec:
   trigger:
     manual: {{ .Values.restore.trigger | quote }}
   restic:
+    accessModes: {{ .Values.restore.accessModes }}
     capacity: {{ .Values.restore.pvcSize }}
     cacheCapacity: {{ .Values.restore.cacheCapacity | default .Values.backup.cacheCapacity }}
     cacheStorageClassName: {{ .Values.restore.cacheStorageClass | default .Values.backup.cacheStorageClass }}
