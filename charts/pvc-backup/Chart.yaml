@@ -2,5 +2,5 @@ apiVersion: v2
 name: pvc-backup
 description: A Helm chart for VolSync PVC backups to Backblaze B2
 type: application
-version: 2.0.0
+version: 2.0.1
 appVersion: "1.0"
