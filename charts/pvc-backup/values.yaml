@@ -8,17 +8,18 @@ appName: ""
 argoSyncWave: "-100"
 
 backup:
+  # -- Name of the source PVC (required)
+  pvcName: ""
+
   # -- Backup trigger, either schedule or manual trigger
   trigger:
     # -- Backup schedule in cron format
     # Default: Daily at 1:00 AM
     # Examples: "0 2 * * *" (2 AM daily), "0 1 * * 0" (1 AM Sundays only)
-    # Set to null when using manual trigger only.
     schedule: "0 1 * * *"
     # -- Manual trigger name for backup operation
     # Change this value to trigger a new backup
     # Example: "backup-2024-01-15", "emergency-backup"
-    # Requires schedule to be null.
     manual: ~
 
   retain:
@@ -32,23 +33,55 @@ backup:
   # -- How often to run backup pruning (in days)
   pruneIntervalDays: 7
 
-  cache:
-    # -- Size of restic cache volume
-    # Examples: "1Gi", "2Gi", "512Mi"
-    capacity: 2Gi
-    # -- Storage class for backup cache volumes
-    storageClass: longhorn-single-replica
+  # -- Size of restic cache volume
+  # Examples: "1Gi", "2Gi", "512Mi"
+  cacheCapacity: 2Gi
 
-  pvc:
-    # -- Name of the source PVC (required)
-    name: ""
-    # -- Storage class for  volumes
-    storageClass: longhorn
-    # -- Volume snapshot class for creating PVC snapshots
-    volumeSnapshotClass: longhorn-snapshot
+  # -- Storage class for backup cache volumes
+  cacheStorageClass: longhorn-single-replica
+
+  # -- Storage class for  volumes
+  storageClass: longhorn
+
+  # -- Volume snapshot class for creating PVC snapshots
+  volumeSnapshotClass: longhorn-snapshot
 
 # Restore configuration
 restore:
+  # -- Enable restore functionality (creates ReplicationDestination)
+  enabled: false
+
+  # -- Name of the destination PVC
+  # Defaults to source PVC name
+  pvcName: ""
+
+  # -- Size of the restored volume (required)
+  pvcSize: ""
+
+  # -- Access modes for the destination volume
+  accessModes:
+    - ReadWriteOnce
+
+  # -- Storage class for destination volumes used during restore
+  # Defaults to source volume storageClass if omitted
+  storageClass: ""
+
+  # -- Enable file deletion during restore
+  # If true, files and directories that exist on the PVC being restored to
+  # will be deleted if they do not exist in the restic snapshot being restored
+  # Default: false
+  enableFileDeletion: true
+
+  # -- Restore data from a specific point in time (RFC-3339 timestamp)
+  # If not specified, restores from the most recent backup
+  # Example: "2024-01-15T10:30:00Z"
+  restoreAsOf: ""
+
+  # -- Manual trigger name for restore operation
+  # Change this value to trigger a new restore
+  # Example: "restore-2024-01-15", "emergency-restore"
+  trigger: "restore"
+
   # -- Enable cache PVC deletion
   # If true, restic cache PVC are deleted at the end of each restore. Cache PVCs will be always be deleted if the owning ReplicationDestination is removed.
   # Should be disabled when using longhorn https://github.com/backube/volsync/issues/1504
@@ -61,37 +94,13 @@ restore:
   # Default: false
   cleanupTempPVC: false
 
-  # -- Enable restore functionality (creates ReplicationDestination)
-  enabled: false
+  # -- Size of restic cache volume
+  # Defaults to backup cache size
+  cacheCapacity: ""
 
-  # -- Enable file deletion during restore
-  # If true, files and directories that exist on the PVC being restored to
-  # will be deleted if they do not exist in the restic snapshot being restored
-  # Default: false
-  enableFileDeletion: false
-
-  pvc:
-    # -- Access modes for the destination volume
-    accessModes:
-      - ReadWriteOnce
-    # -- Name of the destination PVC
-    # Defaults to source PVC name
-    name: ""
-    # -- Storage class for destination volumes used during restore
-    # Defaults to source volume storageClass if omitted
-    storageClass: ""
-    # -- Size of the restored volume (required)
-    size: ""
-
-  # -- Restore data from a specific point in time (RFC-3339 timestamp)
-  # If not specified, restores from the most recent backup
-  # Example: "2024-01-15T10:30:00Z"
-  restoreAsOf: ""
-
-  # -- Manual trigger name for restore operation
-  # Change this value to trigger a new restore
-  # Example: "restore-2024-01-15", "emergency-restore"
-  trigger: "restore"
+  # -- Storage class for backup cache volumes
+  # Defaults to backup cache storageClass
+  cacheStorageClass: ""
 
 # Restic security context configuration
 restic:

@@ -4,12 +4,12 @@ appName: "test"
 backup:
   trigger:
     schedule: "0 1 * * *"
+    manual: backup-now
   pruneIntervalDays: 7
-  cache:
-    capacity: 2Gi
-  pvc:
-    storageClass: longhorn
-    volumeSnapshotClass: longhorn-snapshot
+  cacheCapacity: 2Gi
+  pvcName: test-data
+  storageClass: longhorn
+  volumeSnapshotClass: longhorn-snapshot
 
 restic:
   runAsUser: 65534
@@ -23,11 +23,10 @@ s3:
   secretKey: backblaze-volsync
 
 restore:
-  cache:
-    capacity: "1Gi"
   enabled: true
+  cacheCapacity: "1Gi"
   enableFileDeletion: true
-  pvc:
-    size: 10Gi
-    name: foo
+  pvcSize: 10Gi
+  pvcName: foo
+  storageClass: ceph-block
   restoreAsOf: "2024-01-15T10:30:00Z"

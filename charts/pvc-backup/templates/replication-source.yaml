@@ -6,7 +6,7 @@ metadata:
   labels:
     {{- include "chart.labels" . | nindent 4 }}
 spec:
-  sourcePVC: {{ .Values.pvcName }}
+  sourcePVC: {{ .Values.backup.pvcName }}
   trigger:
     {{- with .Values.backup.trigger.manual }}
     manual: {{ . | quote }}
@@ -15,8 +15,8 @@ spec:
     schedule: {{ . | quote }}
     {{- end }}
   restic:
-    cacheCapacity: {{ .Values.backup.cache.capacity }}
-    cacheStorageClassName: {{ .Values.backup.cache.storageClass }}
+    cacheCapacity: {{ .Values.backup.cacheCapacity }}
+    cacheStorageClassName: {{ .Values.backup.cacheStorageClass }}
     copyMethod: Snapshot
     moverSecurityContext:
       runAsUser: {{ .Values.restic.runAsUser }}
@@ -29,5 +29,5 @@ spec:
       daily: {{ .Values.backup.retain.daily }}
       weekly: {{ .Values.backup.retain.weekly }}
     repository: {{ include "chart.repository" . }}
-    storageClassName: {{ .Values.backup.pvc.storageClass }}
-    volumeSnapshotClassName: {{ .Values.backup.pvc.volumeSnapshotClass }}
+    storageClassName: {{ .Values.backup.storageClass }}
+    volumeSnapshotClassName: {{ .Values.backup.volumeSnapshotClass }}
