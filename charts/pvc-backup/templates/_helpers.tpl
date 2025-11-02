@@ -9,3 +9,7 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 app.kubernetes.io/component: backup
 app.kubernetes.io/part-of: {{ .Values.appName }}
 {{- end }}
+
+{{- define "chart.repository" -}}
+{{ required ".Values.appName is required" .Values.appName }}-volsync-{{ .Values.s3.provider }}
+{{- end }}

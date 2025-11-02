@@ -1,28 +1,22 @@
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/volsync.backube/replicationsource_v1alpha1.json
----
 apiVersion: volsync.backube/v1alpha1
 kind: ReplicationSource
 metadata:
-  name: {{ .Values.appName }}-data-b2
+  name: {{ include "chart.repository" . }}
   labels:
     {{- include "chart.labels" . | nindent 4 }}
 spec:
   sourcePVC: {{ .Values.pvcName }}
-  {{- $trigger := .Values.backup.trigger }}
-  {{- $hasSchedule := and $trigger.schedule (ne $trigger.schedule "") }}
-  {{- $hasManual := and $trigger.manual (ne $trigger.manual "") }}
-  {{- if and (not $hasManual) (not $hasSchedule) }}
-    {{- fail "backup.trigger: configure schedule or manual value" }}
-  {{- end }}
   trigger:
-    {{- if $hasManual }}
-    manual: {{ $trigger.manual | quote }}
-    {{- else if $hasSchedule }}
-    schedule: {{ $trigger.schedule | quote }}
+    {{- with .Values.backup.trigger.manual }}
+    manual: {{ . | quote }}
+    {{- end }}
+    {{- with .Values.backup.trigger.schedule }}
+    schedule: {{ . | quote }}
     {{- end }}
   restic:
-    cacheCapacity: {{ .Values.backup.cacheCapacity }}
-    cacheStorageClassName: {{ .Values.backup.cacheStorageClassName }}
+    cacheCapacity: {{ .Values.backup.cache.capacity }}
+    cacheStorageClassName: {{ .Values.backup.cache.storageClass }}
     copyMethod: Snapshot
     moverSecurityContext:
       runAsUser: {{ .Values.restic.runAsUser }}
@@ -34,6 +28,6 @@ spec:
       hourly: {{ .Values.backup.retain.hourly }}
       daily: {{ .Values.backup.retain.daily }}
       weekly: {{ .Values.backup.retain.weekly }}
-    repository: {{ .Values.appName }}-volsync-b2
-    storageClassName: {{ .Values.backup.storageClassName }}
-    volumeSnapshotClassName: {{ .Values.backup.volumeSnapshotClassName }}
+    repository: {{ include "chart.repository" . }}
+    storageClassName: {{ .Values.backup.pvc.storageClass }}
+    volumeSnapshotClassName: {{ .Values.backup.pvc.volumeSnapshotClass }}

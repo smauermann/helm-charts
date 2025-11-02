@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft-07/schema#",
   "type": "object",
-  "required": ["appName", "pvcName"],
+  "required": ["appName", "backup"],
   "properties": {
     "appName": {
       "type": "string",
@@ -10,17 +10,23 @@
       "minLength": 1,
       "maxLength": 63
     },
-    "pvcName": {
-      "type": "string",
-      "description": "Name of the PersistentVolumeClaim to backup",
-      "pattern": "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$",
-      "minLength": 1,
-      "maxLength": 63
+    "argoSyncWave": {
+      "description": "ArgoCD sync wave annotation applied to generated resources",
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^-?[0-9]+$"
+        },
+        {
+          "type": "integer"
+        }
+      ],
+      "default": "-100"
     },
     "backup": {
       "type": "object",
       "description": "Backup configuration settings",
-      "required": ["trigger"],
+      "required": ["trigger", "pvc"],
       "properties": {
         "trigger": {
           "type": "object",
@@ -101,26 +107,141 @@
           "maximum": 365,
           "default": 7
         },
-        "cacheCapacity": {
-          "type": "string",
-          "description": "Size of the restic cache volume (e.g., '2Gi', '1Gi')",
-          "pattern": "^\\d+([EPTGMK]i?)?$",
-          "default": "2Gi"
+        "cache": {
+          "type": "object",
+          "description": "Restic cache volume configuration",
+          "properties": {
+            "capacity": {
+              "type": "string",
+              "description": "Size of the restic cache volume (e.g., '2Gi', '1Gi')",
+              "pattern": "^\\d+([EPTGMK]i?)?$",
+              "default": "2Gi"
+            },
+            "storageClass": {
+              "type": "string",
+              "description": "Storage class for restic cache volumes",
+              "minLength": 1,
+              "default": "longhorn-single-replica"
+            }
+          },
+          "required": ["capacity"],
+          "additionalProperties": false
         },
-        "cacheStorageClassName": {
-          "type": "string",
-          "description": "Storage class for restic cache volumes",
-          "default": "longhorn-single-replica"
+        "pvc": {
+          "type": "object",
+          "description": "Source PVC configuration for backup operations",
+          "properties": {
+            "name": {
+              "type": "string",
+              "description": "Name of the source PersistentVolumeClaim to backup",
+              "pattern": "^(|[a-z0-9]([-a-z0-9]*[a-z0-9])?)$",
+              "minLength": 0,
+              "maxLength": 63
+            },
+            "storageClass": {
+              "type": "string",
+              "description": "Storage class for the source PVC",
+              "minLength": 1,
+              "default": "longhorn"
+            },
+            "volumeSnapshotClass": {
+              "type": "string",
+              "description": "Volume snapshot class for creating PVC snapshots",
+              "minLength": 1,
+              "default": "longhorn-snapshot"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "restore": {
+      "type": "object",
+      "description": "Restore configuration for recovering PVC data from backups",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Enable restore functionality (creates ReplicationDestination)",
+          "default": false
         },
-        "storageClassName": {
-          "type": "string",
-          "description": "Storage class for destination volumes",
-          "default": "longhorn"
+        "cache": {
+          "type": "object",
+          "description": "Override cache volume settings specifically for restore operations",
+          "properties": {
+            "capacity": {
+              "type": "string",
+              "description": "Size of restic cache volume for restore (defaults to backup.cache.capacity when empty)",
+              "pattern": "^(|\\d+([EPTGMK]i?)?)$"
+            },
+            "storageClass": {
+              "type": "string",
+              "description": "Storage class for restore cache volumes (defaults to backup.cache.storageClass when empty)",
+              "default": ""
+            }
+          },
+          "additionalProperties": false
         },
-        "volumeSnapshotClassName": {
+        "cleanupCachePVC": {
+          "type": "boolean",
+          "description": "Enable cache PVC deletion after restore",
+          "default": false
+        },
+        "cleanupTempPVC": {
+          "type": "boolean",
+          "description": "Enable temporary destination PVC deletion. Ignored if `destinationPVC` is set",
+          "default": false
+        },
+        "enableFileDeletion": {
+          "type": "boolean",
+          "description": "Enable file deletion during restore - files on PVC will be deleted if they don't exist in snapshot",
+          "default": false
+        },
+        "trigger": {
           "type": "string",
-          "description": "Volume snapshot class for creating PVC snapshots",
-          "default": "longhorn-snapshot"
+          "description": "Manual trigger name for restore operation",
+          "minLength": 1,
+          "maxLength": 63,
+          "default": "restore"
+        },
+        "restoreAsOf": {
+          "type": "string",
+          "description": "RFC-3339 timestamp for point-in-time restore (optional)",
+          "pattern": "^(|\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d{3})?Z?)$"
+        },
+        "pvc": {
+          "type": "object",
+          "description": "Destination PVC configuration for restore operations",
+          "properties": {
+            "accessModes": {
+              "type": "array",
+              "description": "Access modes applied to the restore PVC",
+              "items": {
+                "type": "string",
+                "enum": ["ReadWriteOnce", "ReadWriteMany", "ReadOnlyMany"]
+              },
+              "minItems": 1,
+              "uniqueItems": true,
+              "default": ["ReadWriteOnce"]
+            },
+            "name": {
+              "type": "string",
+              "description": "Name of the destination PVC to restore data into (defaults to source PVC name when empty)",
+              "pattern": "^(|[a-z0-9]([-a-z0-9]*[a-z0-9])?)$",
+              "maxLength": 63
+            },
+            "size": {
+              "type": "string",
+              "description": "Size of the restored volume",
+              "pattern": "^(|\\d+([EPTGMK]i?)?)$"
+            },
+            "storageClass": {
+              "type": "string",
+              "description": "Storage class for destination volumes used during restore (defaults to backup.pvc.storageClass)",
+              "default": ""
+            }
+          },
+          "additionalProperties": false
         }
       },
       "additionalProperties": false
@@ -153,13 +274,20 @@
       },
       "additionalProperties": false
     },
-    "b2": {
+    "s3": {
       "type": "object",
-      "description": "Backblaze B2 configuration via External Secrets",
+      "description": "S3-compatible repository configuration via External Secrets",
       "properties": {
+        "provider": {
+          "type": "string",
+          "description": "Provider identifier used in repository naming",
+          "minLength": 1,
+          "pattern": "^[a-z0-9\\-]+$",
+          "default": "b2"
+        },
         "secretStoreRef": {
           "type": "object",
-          "description": "Reference to the secret store containing B2 credentials",
+          "description": "Reference to the secret store containing repository credentials",
           "properties": {
             "kind": {
               "type": "string",
@@ -170,6 +298,7 @@
             "name": {
               "type": "string",
               "description": "Name of the secret store",
+              "minLength": 1,
               "default": "onepassword-connect"
             }
           },
@@ -178,75 +307,12 @@
         },
         "secretKey": {
           "type": "string",
-          "description": "Key name in the secret store containing B2 credentials",
+          "description": "Key name in the secret store containing repository credentials",
+          "minLength": 1,
           "default": "backblaze-volsync"
         }
       },
-      "additionalProperties": false
-    },
-    "restore": {
-      "type": "object",
-      "description": "Restore configuration for recovering PVC data from backups",
-      "properties": {
-        "enabled": {
-          "type": "boolean",
-          "description": "Enable restore functionality (creates ReplicationDestination)",
-          "default": false
-        },
-        "destinationPVC": {
-          "type": "string",
-          "description": "Name of the PVC to restore data into (defaults to pvcName if empty)",
-          "pattern": "^(|[a-z0-9]([-a-z0-9]*[a-z0-9])?)$",
-          "maxLength": 63
-        },
-        "trigger": {
-          "type": "string",
-          "description": "Manual trigger name for restore operation",
-          "minLength": 1,
-          "maxLength": 63,
-          "default": "restore"
-        },
-        "restoreAsOf": {
-          "type": "string",
-          "description": "RFC-3339 timestamp for point-in-time restore (optional)",
-          "pattern": "^(|\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d{3})?Z?)$"
-        },
-        "copyMethod": {
-          "type": "string",
-          "description": "Copy method for restore operation",
-          "enum": ["Direct", "Clone", "Snapshot"],
-          "default": "Snapshot"
-        },
-        "cacheCapacity": {
-          "type": "string",
-          "description": "Size of restic cache volume for restore (defaults to backup.cacheCapacity)",
-          "pattern": "^(|\\d+([EPTGMK]i?)?)$"
-        },
-        "cacheStorageClassName": {
-          "type": "string",
-          "description": "Storage class for restore cache volumes (defaults to backup.cacheStorageClassName)",
-          "default": ""
-        },
-        "storageClassName": {
-          "type": "string",
-          "description": "Storage class for destination volumes used during restore (defaults to backup.storageClassName)"
-        },
-        "enableFileDeletion": {
-          "type": "boolean",
-          "description": "Enable file deletion during restore - files on PVC will be deleted if they don't exist in snapshot",
-          "default": false
-        },
-        "cleanupCachePVC": {
-          "type": "boolean",
-          "description": "Enable cache PVC deletion after restore",
-          "default": false
-        },
-        "cleanupTempPVC": {
-          "type": "boolean",
-          "description": "Enable temporary destination PVC deletion. Ignored if `destinationPVC` is set",
-          "default": false
-        }
-      },
+      "required": ["secretStoreRef", "secretKey"],
       "additionalProperties": false
     }
   },

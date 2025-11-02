@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Values.restore.pvc.name | default .Values.backup.pvc.name }}
+  labels:
+    {{- include "chart.labels" . | nindent 4 }}
+  annotations:
+    argocd.argoproj.io/sync-wave: {{ .Values.argoSyncWave }}
+spec:
+  accessModes: {{ .Values.restore.pvc.accessModes }}
+  dataSourceRef:
+    kind: ReplicationDestination
+    apiGroup: volsync.backube
+    name: {{ include "chart.repository" . }}
+  resources:
+    requests:
+      storage: {{ required ".Values.restore.pvc.size is required" .Values.restore.pvc.size }}
+  storageClassName: {{ .Values.restore.pvc.storageClass | default .Values.backup.pvc.storageClass }}

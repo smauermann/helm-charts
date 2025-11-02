@@ -1,37 +1,38 @@
-{{- if .Values.restore.enabled }}
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/volsync.backube/replicationdestination_v1alpha1.json
----
+{{- if .Values.restore.enabled }}
 apiVersion: volsync.backube/v1alpha1
 kind: ReplicationDestination
 metadata:
-  name: {{ .Values.appName }}-restore-b2
+  name: {{ include "chart.repository" . }}
   labels:
     {{- include "chart.labels" . | nindent 4 }}
+  annotations:
+    argocd.argoproj.io/sync-wave: {{ .Values.argoSyncWave }}
 spec:
   trigger:
     manual: {{ .Values.restore.trigger | quote }}
   restic:
-    destinationPVC: {{ .Values.restore.destinationPVC | default .Values.pvcName }}
-    repository: {{ .Values.appName }}-volsync-b2
-    copyMethod: {{ .Values.restore.copyMethod }}
-    {{- with .Values.restore.restoreAsOf }}
-    restoreAsOf: {{ . | quote }}
-    {{- end }}
-    {{- with .Values.restore.enableFileDeletion }}
-    enableFileDeletion: {{ . }}
-    {{- end }}
-    cacheCapacity: {{ .Values.restore.cacheCapacity | default .Values.backup.cacheCapacity }}
-    cacheStorageClassName: {{ .Values.restore.cacheStorageClassName | default .Values.backup.cacheStorageClassName }}
-    moverSecurityContext:
-      runAsUser: {{ .Values.restic.runAsUser }}
-      runAsGroup: {{ .Values.restic.runAsGroup }}
-      fsGroup: {{ .Values.restic.fsGroup }}
-      fsGroupChangePolicy: Always
-    storageClassName: {{ .Values.restore.storageClassName | default .Values.backup.storageClassName }}
+    capacity: {{ .Values.restore.pvc.size }}
+    cacheCapacity: {{ .Values.backup.cache.capacity }}
+    cacheStorageClassName: {{ .Values.backup.cache.storageClass }}
     {{- with .Values.restore.cleanupCachePVC }}
     cleanupCachePVC: {{ . }}
     {{- end }}
     {{- with .Values.restore.cleanupTempPVC }}
     cleanupTempPVC: {{ . }}
     {{- end }}
+    copyMethod: Snapshot
+    {{- with .Values.restore.enableFileDeletion }}
+    enableFileDeletion: {{ . }}
+    {{- end }}
+    moverSecurityContext:
+      runAsUser: {{ .Values.restic.runAsUser }}
+      runAsGroup: {{ .Values.restic.runAsGroup }}
+      fsGroup: {{ .Values.restic.fsGroup }}
+      fsGroupChangePolicy: Always
+    repository: {{ include "chart.repository" . }}
+    {{- with .Values.restore.restoreAsOf }}
+    restoreAsOf: {{ . | quote }}
+    {{- end }}
+    storageClassName: {{ .Values.restore.pvc.storageClass | default .Values.backup.pvc.storageClass }}
 {{- end }}
