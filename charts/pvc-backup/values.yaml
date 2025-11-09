@@ -105,11 +105,11 @@ restore:
 # Restic security context configuration
 restic:
   # -- User ID to run restic process as
-  runAsUser: 65534
+  runAsUser: 1000
   # -- Group ID to run restic process as
-  runAsGroup: 65534
+  runAsGroup: 1000
   # -- File system group for restic volumes
-  fsGroup: 65534
+  fsGroup: 1000
 
 # Backblaze B2 configuration via External Secrets
 s3:
