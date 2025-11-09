@@ -20,10 +20,12 @@
     "backup": {
       "type": "object",
       "description": "Backup configuration settings",
-      "required": [
-        "pvcName"
-      ],
       "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Enable backup functionality (creates ReplicationSource)",
+          "default": true
+        },
         "trigger": {
           "type": "object",
           "description": "Backup trigger configuration. Provide a cron schedule, a manual trigger, or both (manual overrides schedule when both are set).",
@@ -145,7 +147,9 @@
           "default": "longhorn-snapshot"
         }
       },
-      "required": ["pvcName"],
+      "required": [
+        "pvcName"
+      ],
       "additionalProperties": false
     },
     "restore": {

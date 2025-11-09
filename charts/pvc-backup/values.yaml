@@ -8,6 +8,9 @@ appName: ""
 argoSyncWave: "-100"
 
 backup:
+  # -- Enable backup functionality (creates ReplicationSource)
+  enabled: true
+
   # -- Name of the source PVC (required)
   pvcName: ""
 
@@ -48,7 +51,7 @@ backup:
 
 # Restore configuration
 restore:
-  # -- Enable restore functionality (creates ReplicationDestination)
+  # -- Enable restore functionality (creates ReplicationDestination and destinationPVC)
   enabled: false
 
   # -- Name of the destination PVC
