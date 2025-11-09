@@ -1,3 +1,5 @@
+{{ if .Values.restore.enabled }}
+---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -16,3 +18,4 @@ spec:
     requests:
       storage: {{ required ".Values.restore.pvcSize is required" .Values.restore.pvcSize }}
   storageClassName: {{ .Values.restore.storageClass | default .Values.backup.storageClass }}
+{{ end }}
