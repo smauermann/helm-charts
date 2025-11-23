@@ -27,11 +27,11 @@ backup:
 
   retain:
     # -- Number of hourly backups to keep
-    hourly: 0
+    hourly: 24
     # -- Number of daily backups to keep
     daily: 7
     # -- Number of weekly backups to keep
-    weekly: 4
+    weekly: 0
 
   # -- How often to run backup pruning (in days)
   pruneIntervalDays: 7
@@ -89,7 +89,7 @@ restore:
   # If true, restic cache PVC are deleted at the end of each restore. Cache PVCs will be always be deleted if the owning ReplicationDestination is removed.
   # Should be disabled when using longhorn https://github.com/backube/volsync/issues/1504
   # Default: false
-  cleanupCachePVC: false
+  cleanupCachePVC: true
 
   # -- Enable temporary PVC deletion
   # If true, delete the temporary destination PVC. No effect when `destinationPVC` is defined.
