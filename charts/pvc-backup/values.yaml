@@ -27,7 +27,7 @@ backup:
 
   retain:
     # -- Number of hourly backups to keep
-    hourly: 24
+    hourly: 0
     # -- Number of daily backups to keep
     daily: 7
     # -- Number of weekly backups to keep
