@@ -89,7 +89,7 @@ restore:
   # If true, restic cache PVC are deleted at the end of each restore. Cache PVCs will be always be deleted if the owning ReplicationDestination is removed.
   # Should be disabled when using longhorn https://github.com/backube/volsync/issues/1504
   # Default: false
-  cleanupCachePVC: true
+  cleanupCachePVC: false
 
   # -- Enable temporary PVC deletion
   # If true, delete the temporary destination PVC. No effect when `destinationPVC` is defined.
